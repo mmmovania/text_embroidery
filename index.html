@@ -3,359 +3,410 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Stitchwork — GLSL Embroidery</title>
+<title>Stitchwork — Embroidery Text</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700;900&family=Cinzel:wght@500;700&family=Great+Vibes&family=Libre+Baskerville:wght@700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root{--linen:#ece4d6;--ink:#3a342b;--muted:#8a8170;--thread:#7d2b90;--card:#f6f1e7;--line:#cfc4ad;}
+  :root{
+    --linen:#ece4d6;
+    --linen-deep:#ded3bf;
+    --ink:#3a342b;
+    --muted:#8a8170;
+    --thread:#7d2b90;
+    --card:#f6f1e7;
+    --line:#cfc4ad;
+    --accent:#b0472a;
+  }
   *{box-sizing:border-box;}
   html,body{margin:0;height:100%;}
-  body{font-family:"Work Sans",system-ui,sans-serif;color:var(--ink);
-    background:radial-gradient(circle at 1px 1px, rgba(0,0,0,.05) 1px, transparent 0) 0 0 / 7px 7px, var(--linen);
-    -webkit-font-smoothing:antialiased;}
-  .wrap{max-width:1080px;margin:0 auto;padding:32px 22px 60px;display:grid;grid-template-columns:300px 1fr;gap:30px;align-items:start;}
+  body{
+    font-family:"Work Sans",system-ui,sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(circle at 1px 1px, rgba(0,0,0,.05) 1px, transparent 0) 0 0 / 7px 7px,
+      var(--linen);
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{
+    max-width:1080px;margin:0 auto;padding:32px 22px 60px;
+    display:grid;grid-template-columns:300px 1fr;gap:30px;align-items:start;
+  }
   header.title{grid-column:1 / -1;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:4px;}
-  header.title h1{font-family:"Playfair Display",serif;font-weight:900;font-size:34px;letter-spacing:-.5px;margin:0;}
+  header.title h1{
+    font-family:"Playfair Display",serif;font-weight:900;
+    font-size:34px;letter-spacing:-.5px;margin:0;color:var(--ink);
+  }
   header.title h1 em{font-style:italic;color:var(--thread);}
-  header.title p{margin:0;color:var(--muted);font-size:14px;max-width:440px;}
-  .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 18px;
-    box-shadow:0 1px 0 #fff inset,0 8px 24px -18px rgba(0,0,0,.4);position:sticky;top:24px;}
-  .field{margin-bottom:18px;}.field:last-child{margin-bottom:0;}
-  label.lbl{display:block;font-size:11px;font-weight:600;letter-spacing:.10em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;}
-  textarea,select{width:100%;font-family:inherit;font-size:15px;color:var(--ink);background:#fffdf8;border:1px solid var(--line);border-radius:9px;padding:10px 11px;outline:none;transition:border-color .15s,box-shadow .15s;}
+  header.title p{margin:0;color:var(--muted);font-size:14px;max-width:430px;}
+
+  /* control panel */
+  .panel{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:20px 18px;box-shadow:0 1px 0 #fff inset, 0 8px 24px -18px rgba(0,0,0,.4);
+    position:sticky;top:24px;
+  }
+  .field{margin-bottom:18px;}
+  .field:last-child{margin-bottom:0;}
+  label.lbl{
+    display:block;font-size:11px;font-weight:600;letter-spacing:.10em;
+    text-transform:uppercase;color:var(--muted);margin-bottom:7px;
+  }
+  textarea,select{
+    width:100%;font-family:inherit;font-size:15px;color:var(--ink);
+    background:#fffdf8;border:1px solid var(--line);border-radius:9px;
+    padding:10px 11px;outline:none;transition:border-color .15s, box-shadow .15s;
+  }
   textarea{resize:vertical;min-height:54px;line-height:1.35;}
   textarea:focus,select:focus{border-color:var(--thread);box-shadow:0 0 0 3px rgba(125,43,144,.14);}
+
   .swatches{display:flex;flex-wrap:wrap;gap:8px;}
-  .swatch{width:30px;height:30px;border-radius:50%;border:2px solid #fff;cursor:pointer;box-shadow:0 0 0 1px var(--line),0 2px 4px rgba(0,0,0,.18);transition:transform .12s;}
+  .swatch{
+    width:30px;height:30px;border-radius:50%;border:2px solid #fff;cursor:pointer;
+    box-shadow:0 0 0 1px var(--line), 0 2px 4px rgba(0,0,0,.18);
+    transition:transform .12s;
+  }
   .swatch:hover{transform:scale(1.12);}
-  .swatch[aria-pressed="true"]{box-shadow:0 0 0 2px var(--ink),0 2px 5px rgba(0,0,0,.25);}
+  .swatch[aria-pressed="true"]{box-shadow:0 0 0 2px var(--ink), 0 2px 5px rgba(0,0,0,.25);}
   .picker-row{display:flex;align-items:center;gap:10px;margin-top:10px;}
-  input[type="color"]{width:34px;height:30px;padding:0;border:1px solid var(--line);border-radius:7px;background:none;cursor:pointer;}
+  input[type="color"]{
+    width:34px;height:30px;padding:0;border:1px solid var(--line);border-radius:7px;background:none;cursor:pointer;
+  }
   .picker-row span{font-size:12px;color:var(--muted);}
+
   input[type="range"]{width:100%;accent-color:var(--thread);}
   .rng-row{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:2px;}
-  .btns{display:flex;gap:9px;}
-  button.act{flex:1;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;padding:10px 8px;border-radius:9px;border:1px solid var(--line);background:#fffdf8;color:var(--ink);transition:.14s;}
+
+  .btns{display:flex;gap:9px;margin-top:6px;}
+  button.act{
+    flex:1;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;
+    padding:10px 8px;border-radius:9px;border:1px solid var(--line);
+    background:#fffdf8;color:var(--ink);transition:background .14s,border-color .14s;
+  }
   button.act:hover{background:#fff;border-color:var(--thread);color:var(--thread);}
   button.act.primary{background:var(--thread);color:#fff;border-color:var(--thread);}
-  button.act.primary:hover{background:#682377;}
-  .stage{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px;
-    box-shadow:0 1px 0 #fff inset,0 8px 24px -18px rgba(0,0,0,.4);min-height:360px;display:flex;align-items:center;justify-content:center;
-    position:relative;overflow:hidden;cursor:grab;touch-action:none;}
-  .stage.grab{cursor:grabbing;}
-  #hoop{width:100%;max-width:580px;transform-origin:0 0;will-change:transform;}
-  canvas#glc{width:100%;height:auto;display:block;border-radius:8px;box-shadow:0 10px 30px -16px rgba(0,0,0,.5);}
-  .zoomctl{position:absolute;right:14px;bottom:14px;display:flex;gap:6px;z-index:2;}
-  .zoomctl button{width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:rgba(255,253,248,.82);backdrop-filter:blur(3px);cursor:pointer;font-size:16px;line-height:1;color:var(--ink);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px -3px rgba(0,0,0,.4);}
-  .zoomctl button:hover{background:#fff;border-color:var(--thread);color:var(--thread);}
-  #err{position:absolute;left:14px;top:14px;right:14px;font:12px/1.4 monospace;color:#a11;background:#fff8;padding:8px;border-radius:8px;display:none;white-space:pre-wrap;z-index:3;}
+  button.act.primary:hover{background:#682377;color:#fff;}
+
+  /* stage */
+  .stage{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:24px;box-shadow:0 1px 0 #fff inset, 0 8px 24px -18px rgba(0,0,0,.4);
+    min-height:360px;display:flex;align-items:center;justify-content:center;
+  }
+  #hoop{width:100%;max-width:560px;}
+  svg.cloth{width:100%;height:auto;display:block;border-radius:8px;
+    box-shadow:0 10px 30px -16px rgba(0,0,0,.5);}
+
   footer.note{grid-column:1 / -1;color:var(--muted);font-size:12.5px;text-align:center;margin-top:6px;}
   footer.note b{color:var(--ink);font-weight:600;}
-  @media (max-width:760px){.wrap{grid-template-columns:1fr;}.panel{position:static;}}
+
+  @media (max-width:760px){
+    .wrap{grid-template-columns:1fr;}
+    .panel{position:static;}
+  }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="title">
-    <h1>Stitch<em>work</em> · GLSL</h1>
-    <p>The embroidery is rendered in a WebGL fragment shader: an SDF of the glyph drives per-pixel lighting and stitch direction.</p>
+    <h1>Stitch<em>work</em></h1>
+    <p>Type anything and see it rendered as satin-stitch embroidery on cloth.</p>
   </header>
 
   <aside class="panel">
-    <div class="field"><label class="lbl" for="txt">Text</label>
-      <textarea id="txt" maxlength="40" spellcheck="false">Abc</textarea></div>
-    <div class="field"><label class="lbl" for="font">Lettering</label>
+    <div class="field">
+      <label class="lbl" for="txt">Text</label>
+      <textarea id="txt" maxlength="40" spellcheck="false">Abc</textarea>
+    </div>
+
+    <div class="field">
+      <label class="lbl" for="font">Lettering</label>
       <select id="font">
-        <option value="'Playfair Display', serif">Playfair — elegant serif</option>
-        <option value="'Cinzel', serif">Cinzel — engraved caps</option>
-        <option value="'Great Vibes', cursive">Great Vibes — flowing script</option>
-        <option value="'Libre Baskerville', serif">Baskerville — classic book</option>
+        <option value="'Playfair Display', serif" style="font-family:'Playfair Display'">Playfair — elegant serif</option>
+        <option value="'Cinzel', serif" style="font-family:'Cinzel'">Cinzel — engraved caps</option>
+        <option value="'Great Vibes', cursive" style="font-family:'Great Vibes'">Great Vibes — flowing script</option>
+        <option value="'Libre Baskerville', serif" style="font-family:'Libre Baskerville'">Baskerville — classic book</option>
         <option value="Georgia, serif">Georgia — system serif</option>
-      </select></div>
-    <div class="field"><label class="lbl">Thread colour</label>
+      </select>
+    </div>
+
+    <div class="field">
+      <label class="lbl">Thread colour</label>
       <div class="swatches" id="swatches"></div>
-      <div class="picker-row"><input type="color" id="customColor" value="#7d2b90"><span>or pick your own</span></div></div>
-    <div class="field"><label class="lbl" for="mode">Stitch type</label>
-      <select id="mode">
-        <option value="fill">Fill — satin the whole letter</option>
-        <option value="outline">Outline — satin along the edge</option>
-      </select></div>
-    <div class="field"><label class="lbl" for="density">Stitch density</label>
+      <div class="picker-row">
+        <input type="color" id="customColor" value="#7d2b90" aria-label="Custom thread colour">
+        <span>or pick your own</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="lbl" for="density">Stitch density</label>
       <input type="range" id="density" min="3" max="9" step="1" value="5">
-      <div class="rng-row"><span>fine</span><span>chunky</span></div></div>
-    <div class="field"><label class="lbl" for="ow">Outline width</label>
-      <input type="range" id="ow" min="5" max="34" step="1" value="13">
-      <div class="rng-row"><span>thin</span><span>thick</span></div></div>
-    <div class="field"><label class="lbl" for="round">Roundness</label>
-      <input type="range" id="round" min="0" max="10" step="1" value="6">
-      <div class="rng-row"><span>flat</span><span>round</span></div></div>
-    <div class="field"><label class="lbl" for="light">Light angle</label>
-      <input type="range" id="light" min="0" max="360" step="5" value="135">
-      <div class="rng-row"><span>0&deg;</span><span>360&deg;</span></div></div>
-    <div class="field"><label class="lbl" for="cloth">Cloth colour</label>
+      <div class="rng-row"><span>fine</span><span>chunky</span></div>
+    </div>
+
+    <div class="field">
+      <label class="lbl" for="cloth">Cloth colour</label>
       <select id="cloth">
         <option value="#f4efe4">Natural linen</option>
         <option value="#ffffff">White cotton</option>
         <option value="#1c1c22">Black aida</option>
         <option value="#dbe4e0">Pale sage</option>
         <option value="#e9d9c3">Tan</option>
-      </select></div>
-    <div class="field"><div class="btns"><button class="act primary" id="dlPng">Download PNG</button></div></div>
+      </select>
+    </div>
+
+    <div class="field">
+      <div class="btns">
+        <button class="act" id="dlSvg">Download SVG</button>
+        <button class="act primary" id="dlPng">Download PNG</button>
+      </div>
+    </div>
   </aside>
 
   <main class="stage">
-    <div id="hoop"><canvas id="glc"></canvas></div>
-    <div id="err"></div>
-    <div class="zoomctl">
-      <button id="zoomOut" title="Zoom out">&minus;</button>
-      <button id="zoomReset" title="Reset view">&#8634;</button>
-      <button id="zoomIn" title="Zoom in">&plus;</button>
-    </div>
+    <div id="hoop"></div>
   </main>
 
   <footer class="note">
-    Per-pixel embroidery in GLSL — the signed distance field gives each stroke a rounded lit cross-section and orients the satin stitches across it. Adjust roundness and the light angle live.
+    The <b>satin stitch</b> ridges, fuzzy thread edges and raised shadow are built with SVG patterns and filters — no images.
+    SVG export is lossless; PNG works best with the system serif if a web font hasn't loaded.
   </footer>
 </div>
 
-<script id="vs" type="x-shader/x-vertex">
-attribute vec2 aPos;
-varying vec2 vUv;
-void main(){ vUv = aPos*0.5+0.5; gl_Position = vec4(aPos,0.0,1.0); }
-</script>
-
-<script id="fs" type="x-shader/x-fragment">
-precision highp float;
-varying vec2 vUv;
-uniform sampler2D uSDF;
-uniform vec2 uTexel;   // 1/size
-uniform vec2 uPx;      // size in px
-uniform vec3 uThread;
-uniform vec3 uCloth;
-uniform float uBand;   // rib pitch px
-uniform float uRound;  // dome radius px
-uniform float uNz;     // normal z (smaller = more domed)
-uniform vec3 uLight;
-uniform float uDin;    // d_in scale
-uniform float uDout;   // d_out scale
-uniform float uMode;   // 0 = fill, 1 = outline
-uniform float uOW;     // outline band width px
-const float TAU = 6.2831853;
-
-float dIn(vec2 uv){ return texture2D(uSDF, uv).r * uDin; }
-float dOut(vec2 uv){ return texture2D(uSDF, uv).g * uDout; }
-float heightAt(float di){
-  if(uMode < 0.5){ float t=clamp(di/uRound,0.0,1.0); return sqrt(clamp(1.0-(1.0-t)*(1.0-t),0.0,1.0)); }
-  float c = 2.0*clamp(di/uOW,0.0,1.0) - 1.0;          // ridge across the outline band
-  return sqrt(clamp(1.0 - c*c, 0.0, 1.0));
-}
-
-void main(){
-  vec2 uv = vUv;
-  float di = dIn(uv);
-  float dou = dOut(uv);
-  vec2 ex = vec2(uTexel.x,0.0), ey = vec2(0.0,uTexel.y);
-
-  // surface normal from the dome height field
-  float hx = heightAt(dIn(uv+ex)) - heightAt(dIn(uv-ex));
-  float hy = heightAt(dIn(uv+ey)) - heightAt(dIn(uv-ey));
-  vec3 N = normalize(vec3(-hx, -hy, uNz));
-
-  // local across-stroke direction (gradient of the distance field)
-  vec2 g = vec2( dIn(uv+ex*2.0)-dIn(uv-ex*2.0), dIn(uv+ey*2.0)-dIn(uv-ey*2.0) );
-  vec2 across = normalize(g + vec2(1e-5));
-  vec2 tang = vec2(-across.y, across.x);
-
-  // directional satin stitches: ribs spaced along the stroke
-  vec2 pos = uv * uPx;
-  float ph = dot(pos, tang) / uBand;
-  float rib = 0.5 + 0.5*cos(ph*TAU);
-  float ribShade = mix(0.74, 1.0, rib);
-
-  vec3 L = normalize(uLight);
-  float diff = clamp(dot(N,L), 0.0, 1.0);
-  vec3 R = reflect(-L, N);
-  float spec = pow(clamp(R.z, 0.0, 1.0), 22.0);
-
-  float lit = 0.5 + 0.72*diff;
-  vec3 thread = uThread * lit * ribShade + spec*0.5;
-
-  // cloth: subtle woven texture (no relief/contact shadow)
-  float wv = 0.5 + 0.5*sin(pos.x*1.9) * sin(pos.y*1.9);
-  vec3 cloth = uCloth * (0.97 + 0.05*wv);
-
-  float cov;
-  if(uMode < 0.5){
-    cov = clamp((di - dou)*0.7 + 0.5, 0.0, 1.0);
-  } else {
-    float outer = clamp((di - dou)*0.7 + 0.5, 0.0, 1.0);  // glyph edge
-    float inner = clamp((uOW - di)*0.7 + 0.5, 0.0, 1.0);  // inner edge of band
-    cov = outer * inner;
-  }
-  vec3 col = mix(cloth, thread, cov);
-  gl_FragColor = vec4(col, 1.0);
-}
-</script>
-
 <script>
-const ui={txt:document.getElementById('txt'),font:document.getElementById('font'),
-  density:document.getElementById('density'),round:document.getElementById('round'),
-  light:document.getElementById('light'),cloth:document.getElementById('cloth'),
-  mode:document.getElementById('mode'),ow:document.getElementById('ow'),
-  custom:document.getElementById('customColor'),hoop:document.getElementById('hoop'),
-  err:document.getElementById('err')};
-const glc=document.getElementById('glc');
+const SVGNS = "http://www.w3.org/2000/svg";
+const ui = {
+  txt: document.getElementById('txt'),
+  font: document.getElementById('font'),
+  density: document.getElementById('density'),
+  cloth: document.getElementById('cloth'),
+  custom: document.getElementById('customColor'),
+  hoop: document.getElementById('hoop'),
+};
 
-const PRESETS=["#7d2b90","#9c1f3d","#1f3a6e","#1d6b4f","#b8860b","#2b2b2b","#c75b7a","#2d6a8e"];
-let thread="#7d2b90";
-const sw=document.getElementById('swatches');
-PRESETS.forEach(c=>{const b=document.createElement('button');b.className='swatch';b.style.background=c;b.title=c;
-  b.setAttribute('aria-pressed',c===thread?'true':'false');
-  b.addEventListener('click',()=>{thread=c;ui.custom.value=c;[...sw.children].forEach(x=>x.setAttribute('aria-pressed','false'));b.setAttribute('aria-pressed','true');render();});
-  sw.appendChild(b);});
-ui.custom.addEventListener('input',()=>{thread=ui.custom.value;[...sw.children].forEach(x=>x.setAttribute('aria-pressed','false'));render();});
+const PRESETS = ["#7d2b90","#9c1f3d","#1f3a6e","#1d6b4f","#b8860b","#2b2b2b","#c75b7a","#2d6a8e"];
+let thread = "#7d2b90";
 
-function hexRgb(h){h=h.replace('#','');if(h.length===3)h=h.split('').map(c=>c+c).join('');
-  return [parseInt(h.slice(0,2),16)/255,parseInt(h.slice(2,4),16)/255,parseInt(h.slice(4,6),16)/255];}
-
-// ---- exact Euclidean distance transform (Felzenszwalb) ----
-function edt1d(f,n,d,v,z){
-  let k=0; v[0]=0; z[0]=-1e20; z[1]=1e20;
-  for(let q=1;q<n;q++){
-    let s=((f[q]+q*q)-(f[v[k]]+v[k]*v[k]))/(2*q-2*v[k]);
-    while(s<=z[k]){k--; s=((f[q]+q*q)-(f[v[k]]+v[k]*v[k]))/(2*q-2*v[k]);}
-    k++; v[k]=q; z[k]=s; z[k+1]=1e20;
-  }
-  k=0;
-  for(let q=0;q<n;q++){ while(z[k+1]<q)k++; d[q]=(q-v[k])*(q-v[k])+f[v[k]]; }
-}
-function edt2d(seed,W,H){
-  const INF=1e20,g=new Float64Array(W*H);
-  for(let i=0;i<W*H;i++) g[i]=seed[i]?0:INF;
-  const N=Math.max(W,H), f=new Float64Array(N), d=new Float64Array(N), v=new Int32Array(N), z=new Float64Array(N+1);
-  for(let x=0;x<W;x++){ for(let y=0;y<H;y++) f[y]=g[y*W+x]; edt1d(f,H,d,v,z); for(let y=0;y<H;y++) g[y*W+x]=d[y]; }
-  for(let y=0;y<H;y++){ for(let x=0;x<W;x++) f[x]=g[y*W+x]; edt1d(f,W,d,v,z); for(let x=0;x<W;x++) g[y*W+x]=d[x]; }
-  const out=new Float32Array(W*H);
-  for(let i=0;i<W*H;i++) out[i]=Math.sqrt(g[i]);
-  return out;
-}
-
-const DIN=56, DOUT=24;
-function buildSDF(text, family){
-  const FS=220, cv=document.createElement('canvas'), cx=cv.getContext('2d');
-  cx.font=`${FS}px ${family}`;
-  const PAD=Math.round(FS*0.45);
-  const CW=Math.max(4,Math.ceil(cx.measureText(text).width)+PAD*2), CH=Math.round(FS*1.5)+PAD*2;
-  cv.width=CW; cv.height=CH;
-  const baseY=PAD+Math.round(FS*1.06);
-  cx.font=`${FS}px ${family}`; cx.fillStyle='#fff'; cx.textBaseline='alphabetic'; cx.fillText(text,PAD,baseY);
-  const a=cx.getImageData(0,0,CW,CH).data;
-  const fg=new Uint8Array(CW*CH), bg=new Uint8Array(CW*CH);
-  for(let i=0;i<CW*CH;i++){ const on=a[i*4+3]>110?1:0; fg[i]=on; bg[i]=on?0:1; }
-  const din=edt2d(bg,CW,CH), dout=edt2d(fg,CW,CH);
-  const tex=new Uint8Array(CW*CH*4);
-  for(let i=0;i<CW*CH;i++){
-    tex[i*4+0]=Math.min(255, din[i]/DIN*255);
-    tex[i*4+1]=Math.min(255, dout[i]/DOUT*255);
-    tex[i*4+2]=fg[i]?255:0;
-    tex[i*4+3]=255;
-  }
-  return {tex,CW,CH};
-}
-
-// ---- WebGL ----
-let gl, prog, uni={}, tex;
-function showErr(m){ ui.err.style.display='block'; ui.err.textContent=m; }
-function initGL(){
-  gl=glc.getContext('webgl',{preserveDrawingBuffer:true,antialias:true})||glc.getContext('experimental-webgl',{preserveDrawingBuffer:true});
-  if(!gl){ showErr('WebGL is not available in this browser.'); return false; }
-  const compile=(type,src)=>{const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);
-    if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){showErr('Shader error:\n'+gl.getShaderInfoLog(s));return null;}return s;};
-  const vs=compile(gl.VERTEX_SHADER,document.getElementById('vs').textContent);
-  const fs=compile(gl.FRAGMENT_SHADER,document.getElementById('fs').textContent);
-  if(!vs||!fs) return false;
-  prog=gl.createProgram(); gl.attachShader(prog,vs); gl.attachShader(prog,fs); gl.linkProgram(prog);
-  if(!gl.getProgramParameter(prog,gl.LINK_STATUS)){ showErr('Link error:\n'+gl.getProgramInfoLog(prog)); return false; }
-  gl.useProgram(prog);
-  const buf=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,buf);
-  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1, 1,-1, -1,1, 1,1]),gl.STATIC_DRAW);
-  const loc=gl.getAttribLocation(prog,'aPos'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
-  ['uSDF','uTexel','uPx','uThread','uCloth','uBand','uRound','uNz','uLight','uDin','uDout','uMode','uOW'].forEach(n=>uni[n]=gl.getUniformLocation(prog,n));
-  tex=gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D,tex);
-  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
-  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
-  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
-  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
-  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);
-  return true;
-}
-
-function draw(sdf){
-  glc.width=sdf.CW; glc.height=sdf.CH;
-  gl.viewport(0,0,sdf.CW,sdf.CH);
-  gl.bindTexture(gl.TEXTURE_2D,tex);
-  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,sdf.CW,sdf.CH,0,gl.RGBA,gl.UNSIGNED_BYTE,sdf.tex);
-  gl.uniform1i(uni.uSDF,0);
-  gl.uniform2f(uni.uTexel,1/sdf.CW,1/sdf.CH);
-  gl.uniform2f(uni.uPx,sdf.CW,sdf.CH);
-  gl.uniform3fv(uni.uThread,hexRgb(thread));
-  gl.uniform3fv(uni.uCloth,hexRgb(ui.cloth.value));
-  const d=+ui.density.value; gl.uniform1f(uni.uBand, 3.0 + (d-3)*1.1);
-  const r=(+ui.round.value)/10; gl.uniform1f(uni.uRound, 8+r*20); gl.uniform1f(uni.uNz, 1.5 - r*1.0);
-  const az=(+ui.light.value)*Math.PI/180, el=0.95;
-  gl.uniform3f(uni.uLight, Math.cos(az), Math.sin(az), el);
-  gl.uniform1f(uni.uDin,DIN); gl.uniform1f(uni.uDout,DOUT);
-  gl.uniform1f(uni.uMode, ui.mode.value==='outline'?1.0:0.0);
-  gl.uniform1f(uni.uOW, +ui.ow.value);
-  gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
-}
-
-let ready=false;
-function render(){
-  if(!ready) return;
-  const build=()=>{ try{ ui.err.style.display='none'; const sdf=buildSDF(ui.txt.value||' ', ui.font.value); draw(sdf); }
-    catch(e){ showErr('Render error:\n'+e.message); } };
-  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>requestAnimationFrame(build));
-  else build();
-}
-
-let tmr;
-ui.txt.addEventListener('input',()=>{clearTimeout(tmr);tmr=setTimeout(render,140);});
-ui.font.addEventListener('change',render);
-ui.density.addEventListener('input',render);
-ui.round.addEventListener('input',render);
-ui.light.addEventListener('input',render);
-ui.cloth.addEventListener('change',render);
-ui.mode.addEventListener('change',render);
-ui.ow.addEventListener('input',render);
-
-document.getElementById('dlPng').addEventListener('click',()=>{
-  glc.toBlob(b=>{ if(!b)return; const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='embroidery.png';
-    document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1500); },'image/png');
+// build colour swatches
+const sw = document.getElementById('swatches');
+PRESETS.forEach((c,i)=>{
+  const b=document.createElement('button');
+  b.className='swatch';b.style.background=c;b.title=c;
+  b.setAttribute('aria-pressed', c===thread ? 'true':'false');
+  b.addEventListener('click',()=>{
+    thread=c; ui.custom.value=c;
+    [...sw.children].forEach(x=>x.setAttribute('aria-pressed','false'));
+    b.setAttribute('aria-pressed','true');
+    render();
+  });
+  sw.appendChild(b);
+});
+ui.custom.addEventListener('input',()=>{
+  thread=ui.custom.value;
+  [...sw.children].forEach(x=>x.setAttribute('aria-pressed','false'));
+  render();
 });
 
-// zoom & pan
-(function(){
-  const stage=document.querySelector('.stage'), hoop=ui.hoop; let s=1,tx=0,ty=0;
-  const apply=()=>hoop.style.transform=`translate(${tx}px,${ty}px) scale(${s})`;
-  const reset=()=>{s=1;tx=0;ty=0;apply();};
-  function zoomAt(cx,cy,f){const ns=Math.min(16,Math.max(0.3,s*f));const r=hoop.getBoundingClientRect();
-    const lx=(cx-r.left)/s,ly=(cy-r.top)/s;tx-=lx*(ns-s);ty-=ly*(ns-s);s=ns;apply();}
-  stage.addEventListener('wheel',e=>{e.preventDefault();zoomAt(e.clientX,e.clientY,e.deltaY<0?1.12:1/1.12);},{passive:false});
-  let drag=false,lx=0,ly=0;
-  stage.addEventListener('pointerdown',e=>{if(e.target.closest('.zoomctl'))return;drag=true;lx=e.clientX;ly=e.clientY;stage.classList.add('grab');stage.setPointerCapture(e.pointerId);});
-  stage.addEventListener('pointermove',e=>{if(!drag)return;tx+=e.clientX-lx;ty+=e.clientY-ly;lx=e.clientX;ly=e.clientY;apply();});
-  const stop=()=>{drag=false;stage.classList.remove('grab');};
-  stage.addEventListener('pointerup',stop);stage.addEventListener('pointercancel',stop);
-  stage.addEventListener('dblclick',reset);
-  const center=f=>{const r=stage.getBoundingClientRect();zoomAt(r.left+r.width/2,r.top+r.height/2,f);};
-  document.getElementById('zoomIn').addEventListener('click',()=>center(1.25));
-  document.getElementById('zoomOut').addEventListener('click',()=>center(1/1.25));
-  document.getElementById('zoomReset').addEventListener('click',reset);
-})();
+// colour helpers
+function hexToRgb(h){h=h.replace('#','');if(h.length===3)h=h.split('').map(c=>c+c).join('');
+  return {r:parseInt(h.slice(0,2),16),g:parseInt(h.slice(2,4),16),b:parseInt(h.slice(4,6),16)};}
+function shade(hex,amt){const{r,g,b}=hexToRgb(hex);
+  const f=v=>Math.max(0,Math.min(255,Math.round(v+amt)));
+  return `rgb(${f(r)},${f(g)},${f(b)})`;}
+function tintWhite(hex,amt){const{r,g,b}=hexToRgb(hex);   // amt 0..1 toward white
+  const f=v=>Math.round(v+(255-v)*amt);
+  return `rgb(${f(r)},${f(g)},${f(b)})`;}
 
-ready=initGL();
+let lastSVG = null;
+
+function render(){
+  const text = (ui.txt.value || ' ').replace(/&/g,'&amp;').replace(/</g,'&lt;');
+  const fontFamily = ui.font.value;
+  const gap = +ui.density.value;          // stitch band spacing
+  const cloth = ui.cloth.value;
+  const darkCloth = hexToRgb(cloth).r < 90;
+
+  const spec = tintWhite(thread, 0.80);   // cylinder specular highlight
+  const hi   = tintWhite(thread, 0.42);   // lit side
+  const mid  = thread;                     // body
+  const lo   = shade(thread, -72);         // shaded edge / valley between threads
+  const seed = (text.length*7 + gap*3) % 97;
+
+  // satin band geometry
+  const bandW = gap;                       // full stripe width
+  const lightW = (gap/2).toFixed(2);
+
+  // First lay down everything except viewBox; we measure the text then fit.
+  const inner = `
+    <defs>
+      <!-- woven cloth texture -->
+      <filter id="weave" x="-2%" y="-2%" width="104%" height="104%">
+        <feTurbulence type="turbulence" baseFrequency="0.9 0.9" numOctaves="2" seed="${seed+11}" result="n"/>
+        <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .07 0"/>
+        <feComposite operator="over" in2="SourceGraphic"/>
+      </filter>
+      <pattern id="warp" width="3.2" height="3.2" patternUnits="userSpaceOnUse">
+        <rect width="3.2" height="3.2" fill="${cloth}"/>
+        <rect width="1.6" height="3.2" fill="${darkCloth?'rgba(255,255,255,.05)':'rgba(0,0,0,.045)'}"/>
+        <rect y="1.6" width="3.2" height="1.6" fill="${darkCloth?'rgba(255,255,255,.05)':'rgba(0,0,0,.045)'}"/>
+      </pattern>
+
+      <!-- each satin stitch shaded like a cylinder: shadow -> highlight -> shadow -->
+      <linearGradient id="cyl" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0"    stop-color="${lo}"/>
+        <stop offset="0.15" stop-color="${mid}"/>
+        <stop offset="0.40" stop-color="${hi}"/>
+        <stop offset="0.50" stop-color="${spec}"/>
+        <stop offset="0.62" stop-color="${hi}"/>
+        <stop offset="0.86" stop-color="${mid}"/>
+        <stop offset="1"    stop-color="${lo}"/>
+      </linearGradient>
+      <pattern id="satin" width="${bandW}" height="${bandW}" patternUnits="userSpaceOnUse"
+               patternTransform="rotate(68)">
+        <rect width="${bandW}" height="${bandW}" fill="url(#cyl)"/>
+      </pattern>
+
+      <!-- sheen sweeping across the lettering -->
+      <linearGradient id="sheen" x1="0" y1="0" x2="0" y2="1" gradientTransform="rotate(22)">
+        <stop offset="0" stop-color="#fff" stop-opacity="0.32"/>
+        <stop offset="0.45" stop-color="#fff" stop-opacity="0"/>
+        <stop offset="1" stop-color="#000" stop-opacity="0.18"/>
+      </linearGradient>
+
+      <!-- fuzzy thread edges -->
+      <filter id="fuzz" x="-15%" y="-15%" width="130%" height="130%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.55 0.85" numOctaves="2" seed="${seed}" result="nz"/>
+        <feDisplacementMap in="SourceGraphic" in2="nz" scale="2.4"
+            xChannelSelector="R" yChannelSelector="G"/>
+      </filter>
+
+      <!-- raised drop shadow off the cloth -->
+      <filter id="raise" x="-20%" y="-20%" width="140%" height="160%">
+        <feDropShadow dx="0" dy="2" stdDeviation="2.2" flood-color="#000" flood-opacity="0.42"/>
+      </filter>
+
+      <!-- EMBOSS: light the whole letterform like a raised solid -->
+      <filter id="emboss" x="-25%" y="-25%" width="150%" height="150%">
+        <!-- soft height map from the glyph shape -->
+        <feGaussianBlur in="SourceAlpha" stdDeviation="3" result="hmap"/>
+        <!-- diffuse shading: edges facing away from the light go dark -->
+        <feDiffuseLighting in="hmap" surfaceScale="4" diffuseConstant="1.2"
+            lighting-color="#ffffff" result="diff">
+          <feDistantLight azimuth="225" elevation="55"/>
+        </feDiffuseLighting>
+        <feComposite in="diff" in2="SourceAlpha" operator="in" result="diffC"/>
+        <feBlend in="SourceGraphic" in2="diffC" mode="multiply" result="shaded"/>
+        <!-- specular crest: bright edge where the light hits -->
+        <feSpecularLighting in="hmap" surfaceScale="4" specularConstant="0.85"
+            specularExponent="22" lighting-color="#ffffff" result="spec">
+          <feDistantLight azimuth="225" elevation="55"/>
+        </feSpecularLighting>
+        <feComposite in="spec" in2="SourceAlpha" operator="in" result="specC"/>
+        <feBlend in="shaded" in2="specC" mode="screen"/>
+      </filter>
+    </defs>
+
+    <rect id="bg" fill="url(#warp)" filter="url(#weave)"/>
+    <rect id="border" fill="none"
+          stroke="${darkCloth?'rgba(255,255,255,.35)':'rgba(0,0,0,.32)'}"
+          stroke-width="1.4" stroke-dasharray="5 4" stroke-linecap="round"/>
+
+    <g filter="url(#raise)">
+      <g filter="url(#emboss)">
+        <g filter="url(#fuzz)">
+          <text id="t" font-family="${fontFamily}" fill="url(#satin)"
+                text-anchor="middle" dominant-baseline="middle"
+                style="paint-order:stroke;">${text}</text>
+          <text id="t2" font-family="${fontFamily}" fill="url(#sheen)"
+                text-anchor="middle" dominant-baseline="middle">${text}</text>
+        </g>
+      </g>
+    </g>`;
+
+  // build svg
+  const svg = document.createElementNS(SVGNS,'svg');
+  svg.setAttribute('class','cloth');
+  svg.setAttribute('xmlns',SVGNS);
+  svg.innerHTML = inner;
+  // temporary size for measuring
+  svg.setAttribute('width','600'); svg.setAttribute('height','400');
+  ui.hoop.innerHTML=''; ui.hoop.appendChild(svg);
+
+  const FS = 200;
+  const t = svg.querySelector('#t');
+  const t2 = svg.querySelector('#t2');
+  [t,t2].forEach(el=>{el.setAttribute('font-size',FS);el.setAttribute('x',0);el.setAttribute('y',0);});
+
+  // measure after fonts settle
+  function fit(){
+    let bb;
+    try{ bb = t.getBBox(); }catch(e){ bb={x:-FS/2,y:-FS/2,width:FS,height:FS}; }
+    if(!bb.width){ bb={x:-FS/2,y:-FS/2,width:FS,height:FS}; }
+    const padX = bb.height*0.55 + 24;
+    const padY = bb.height*0.55 + 24;
+    const vbX = bb.x - padX;
+    const vbY = bb.y - padY;
+    const vbW = bb.width + padX*2;
+    const vbH = bb.height + padY*2;
+    svg.setAttribute('viewBox',`${vbX} ${vbY} ${vbW} ${vbH}`);
+    svg.removeAttribute('width'); svg.removeAttribute('height');
+    svg.setAttribute('preserveAspectRatio','xMidYMid meet');
+
+    const bg = svg.querySelector('#bg');
+    bg.setAttribute('x',vbX); bg.setAttribute('y',vbY);
+    bg.setAttribute('width',vbW); bg.setAttribute('height',vbH);
+
+    const inset = Math.min(vbW,vbH)*0.045 + 6;
+    const bd = svg.querySelector('#border');
+    bd.setAttribute('x',vbX+inset); bd.setAttribute('y',vbY+inset);
+    bd.setAttribute('width',vbW-inset*2); bd.setAttribute('height',vbH-inset*2);
+    bd.setAttribute('rx',6);
+
+    lastSVG = svg;
+  }
+
+  if(document.fonts && document.fonts.ready){
+    document.fonts.ready.then(()=>requestAnimationFrame(fit));
+  } else { requestAnimationFrame(fit); }
+}
+
+// debounce text typing
+let tmr;
+ui.txt.addEventListener('input',()=>{clearTimeout(tmr);tmr=setTimeout(render,120);});
+ui.font.addEventListener('change',render);
+ui.density.addEventListener('input',render);
+ui.cloth.addEventListener('change',render);
+
+// ---- export ----
+function serialized(){
+  if(!lastSVG) return null;
+  const clone = lastSVG.cloneNode(true);
+  clone.setAttribute('xmlns',SVGNS);
+  return '<?xml version="1.0" encoding="UTF-8"?>\n'+new XMLSerializer().serializeToString(clone);
+}
+function dl(blob,name){
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1500);
+}
+document.getElementById('dlSvg').addEventListener('click',()=>{
+  const s=serialized(); if(!s)return;
+  dl(new Blob([s],{type:'image/svg+xml'}),'embroidery.svg');
+});
+document.getElementById('dlPng').addEventListener('click',()=>{
+  const s=serialized(); if(!s)return;
+  const vb=lastSVG.getAttribute('viewBox').split(/\s+/).map(Number);
+  const scale=3, w=Math.round(vb[2]*scale), h=Math.round(vb[3]*scale);
+  const img=new Image();
+  img.onload=()=>{
+    const c=document.createElement('canvas');c.width=w;c.height=h;
+    const ctx=c.getContext('2d');ctx.drawImage(img,0,0,w,h);
+    c.toBlob(b=>dl(b,'embroidery.png'),'image/png');
+  };
+  img.onerror=()=>alert('PNG render failed — the SVG download always works.');
+  img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(s);
+});
+
 render();
 </script>
 </body>
